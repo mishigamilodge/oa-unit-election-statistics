@@ -51,6 +51,7 @@ ORDER BY `Chapter`, `Unit_Type`, `Unit_Number`, `Unit_Designation` ASC
 ", OBJECT);
 ?>
 <h5>Unit Election Unit Adult Eligibility</h5>
+<p>If your unit is not listed here, it means either you did not hold an election or we have not yet received your election report as of <?php esc_html_e(get_option("oauestats_last_import")); ?>. Green Adults Remaining column means you can still nominate more adults!</p>
 <?php
     $curchapter = '';
     $tablestarted = 0;
