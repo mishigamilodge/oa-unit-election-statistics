@@ -54,13 +54,29 @@ ORDER BY `Chapter`, `Unit_Type`, `Unit_Number`, `Unit_Designation` ASC
 <?php
     $curchapter = '';
     $tablestarted = 0;
+    $youthcount = 0;
+    $adultslotcount = 0;
+    $adultcount = 0;
+    $adultremaincount = 0;
     foreach ($results AS $obj) {
         if ($curchapter !== $obj->Chapter) {
             if ($tablestarted) {
-                ?></tbody></table><?php
+                ?>
+<tr>
+<th>Chapter Totals:</th>
+<th><?php esc_html_e($youthcount) ?></th>
+<th><?php esc_html_e($adultslotcount) ?></th>
+<th><?php esc_html_e($adultcount) ?></th>
+<th><?php esc_html_e($adultremaincount) ?></th>
+</tr>
+</tbody></table><?php
             }
             $tablestarted = 1;
             $curchapter = $obj->Chapter;
+            $youthcount = 0;
+            $adultslotcount = 0;
+            $adultcount = 0;
+            $adultremaincount = 0;
 ?><table class="oauestats_table">
 <thead>
 <tr><th colspan="5">Chapter: <?php esc_html_e($obj->Chapter) ?></th></tr>
@@ -80,6 +96,10 @@ ORDER BY `Chapter`, `Unit_Type`, `Unit_Number`, `Unit_Designation` ASC
         if ($adultsremain > 0) {
             $adultclass="oauestats_moreadults";
         }
+        $youthcount += $obj->Elected_Count;
+        $adultslotcount += $adultslots;
+        $adultcount += $obj->Nominated_Count;
+        $adultremaincount += $adultsremain;
         ?><tr>
 <th><?php esc_html_e($unit) ?></th>
 <td><?php esc_html_e($obj->Elected_Count) ?></td>

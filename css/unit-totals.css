@@ -2,8 +2,12 @@
     border: 2px solid black;
 }
 .oauestats_table tr th {
+    text-align: middle;
+    border: 2px solid black;
+}
+.oauestats_table tr th:nth-child(1) {
     text-align: left;
-    border: 1px solid black;
+    border: 2px solid black;
 }
 .oauestats_table tr td {
     text-align: center;
