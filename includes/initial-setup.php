@@ -18,7 +18,7 @@
  */
 
 global $oauestats_db_version;
-$oauestats_db_version = 1;
+$oauestats_db_version = 2;
 
 function oauestats_create_table($ddl)
 {
@@ -71,7 +71,7 @@ function oauestats_install()
   `Chapter` VARCHAR(80) NOT NULL,
   `Unit_Location` VARCHAR(80),
   `Unit_Type` VARCHAR(10) NOT NULL,
-  `Unit_Number` VARCHAR(10) NOT NULL,
+  `Unit_Number` INT(6) NOT NULL,
   `Unit_Designation` VARCHAR(3),
   `Unit_City` VARCHAR(80),
   `Unit_State` VARCHAR(30),
@@ -105,7 +105,7 @@ function oauestats_install()
   `Nomination_Type` VARCHAR(30) NOT NULL,
   `Nominated_By` VARCHAR(150) NOT NULL,
   `Nominating_Unit_Type` VARCHAR(10),
-  `Nominating_Unit_Number` VARCHAR(10),
+  `Nominating_Unit_Number` INT(6),
   `Nominating_Unit_Designation` VARCHAR(3),
   `Nominating_Unit_Chapter` VARCHAR(80),
   `Nominating_Unit_City` VARCHAR(80),
@@ -140,9 +140,12 @@ function oauestats_install()
         add_option("oauestats_db_version", $oauestats_db_version);
     }
 
-    # if ($installed_version < 2) {
-    #     # run code for updating from schema version 1 to version 2 here.
-    # }
+    if ($installed_version < 2) {
+        # run code for updating from schema version 1 to version 2 here.
+        # Make the unit number be an integer instead of a string, so it'll sort in the correct order.
+        $wpdb->query("ALTER TABLE `${dbprefix}inductions_data` CHANGE COLUMN `Unit_Number` `Unit_Number` INT(6) NOT NULL");
+        $wpdb->query("ALTER TABLE `${dbprefix}nominations_data` CHANGE COLUMN `Nominating_Unit_Number` `Nominating_Unit_Number` INT(6) NOT NULL");
+    }
 
     # if ($installed_version < 3) {
     #     # run code for updating from schema version 2 to version 3 here.
