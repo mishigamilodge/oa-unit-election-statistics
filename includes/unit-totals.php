@@ -109,6 +109,17 @@ ORDER BY `Chapter`, `Unit_Type`, `Unit_Number`, `Unit_Designation` ASC
 <td class="<?php esc_attr_e($adultclass) ?>"><?php esc_html_e($adultsremain) ?></td>
 </tr><?php
     }
+    if ($tablestarted) {
+        ?>
+<tr>
+<th>Chapter Totals:</th>
+<th><?php esc_html_e($youthcount) ?></th>
+<th><?php esc_html_e($adultslotcount) ?></th>
+<th><?php esc_html_e($adultcount) ?></th>
+<th><?php esc_html_e($adultremaincount) ?></th>
+</tr><?php
+    } ?>
+</tbody></table><?php
     ?></tbody></table><?php
 
 ?><p>Data last updated: <?php esc_html_e(get_option("oauestats_last_import")); ?></p>
