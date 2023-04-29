@@ -19,7 +19,7 @@
 
 add_shortcode( 'oauestats_completion_chart', 'oauestats_completion_chart' );
 function oauestats_completion_chart() {
-    wp_enqueue_script( 'Chart-js-294', 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.bundle.min.js');
+    wp_enqueue_script( 'Chart-js-430', 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.3.0/chart.umd.min.js');
     wp_enqueue_style('oauestats_chart_colors', plugins_url('css/chart-colors.css', dirname(__FILE__)));
     global $wpdb;
     $dbprefix = $wpdb->prefix . "oauestats_";
@@ -65,7 +65,6 @@ var $j = jQuery.noConflict();
 function oauestats_<?php esc_html_e($unique_token) ?>_fixalpha(color, newalpha) {
     var pat = /^rgba?\((\d+),\s*(\d+),\s*(\d+)/;
     var m = pat.exec(color);
-    console.log("fixAlpha passed color = " + color);
     return "rgba(" + m[1] + ", " + m[2] + ", " + m[3] + ", " + newalpha + ")";
 }
 <?php
@@ -76,7 +75,7 @@ function oauestats_<?php esc_html_e($unique_token) ?>_fixalpha(color, newalpha) 
 ?>
 $j(document).ready(function(){
 var oauestats_<?php esc_html_e($unique_token) ?>_chartconfig = {
-    type: 'horizontalBar',
+    type: 'bar',
     data: {
         labels: <?php echo wp_json_encode($labellist); ?>,
         datasets: [
@@ -133,17 +132,30 @@ var oauestats_<?php esc_html_e($unique_token) ?>_chartconfig = {
                 boxWidth: 20
             }
         },
+        indexAxis: 'y',
         scales: {
-            xAxes: [{
+            x: {
+                title: {
+                    display: true,
+                    text: 'Percent'
+                },
                 stacked: true,
                 ticks: {
                     beginAtZero:true,
-                    suggestedMax:100
-                }
-            }],
-            yAxes: [{
+                    max:100
+                },
+                max: 100
+            },
+            y: {
+                title: {
+                    display: true,
+                    text: 'Chapter'
+                },
+                ticks: {
+                    autoSkip: false
+                },
                 stacked: true
-            }]
+            }
         }
     }
 };
