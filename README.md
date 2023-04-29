@@ -34,3 +34,4 @@ Each chart or table is a shortcode. You can place the shortcode wherever you wan
 
 * Update it to use a modern version of Chart.js. I had already working code using an older version so used it in the rush to get it working. The newer version of Chart.js has breaking changes in a few of the APIs I'm using, so it'll need some of the code re-written to use it properly.
 * Outfit the plugin with the tooling for WordPress to be able to detect its version and auto-update it.
+* Fix all the copyright dates and license headers.
