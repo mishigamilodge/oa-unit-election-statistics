@@ -4,14 +4,17 @@
 .oauestats_table tr th {
     text-align: middle;
     border: 2px solid black;
+    width: 15%;
 }
 .oauestats_table tr th:nth-child(1) {
     text-align: left;
     border: 2px solid black;
+    width: 40%;
 }
 .oauestats_table tr td {
     text-align: center;
     border: 1px solid black;
+    width: 15%;
 }
 .oauestats_moreadults {
     background-color: rgb(125, 250, 125);

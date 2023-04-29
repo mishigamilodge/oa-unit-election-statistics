@@ -21,7 +21,7 @@ add_shortcode( 'oauestats_unit_totals', 'oauestats_unit_totals' );
 function oauestats_unit_totals() {
     global $wpdb;
     $dbprefix = $wpdb->prefix . "oauestats_";
-    wp_enqueue_style('oauestats_unit_totals', plugins_url('css/unit-totals.css', dirname(__FILE__)));
+    wp_enqueue_style('oauestats_unit_totals', plugins_url('css/unit-totals.css', dirname(__FILE__)), null, 2);
 
     # so each chart can be independent if used more than once on the same page
     $unique_token = bin2hex(openssl_random_pseudo_bytes(3));
