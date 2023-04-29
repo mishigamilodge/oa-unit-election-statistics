@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (C) 2021 Mishigami Lodge, Order of the Arrow, BSA
+ * Copyright (C) 2023 Mishigami Lodge, Order of the Arrow, BSA
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
