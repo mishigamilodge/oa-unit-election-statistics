@@ -1,3 +1,9 @@
+# Mac Finder droppings
 .DS_Store
+# Generated Composer files
 /vendor
+# vi editor droppings
 *.swp
+# patch droppings
+*.rej
+*.orig
