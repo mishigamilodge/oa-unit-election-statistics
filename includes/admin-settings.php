@@ -50,7 +50,7 @@ if (!function_exists('oa_tools_add_menu')) {
 
 add_action('admin_menu', 'oauestats_config_menu', 9);
 function oauestats_config_menu() {
-    add_submenu_page( "oa_tools", "Upload Induction Data", "Upload Induction Data", 'manage_options', 'oauestats_upload_data', 'oauestats_upload_data');
+    add_submenu_page( "oa_tools", "Upload Inductions Data", "Upload Inductions Data", 'manage_options', 'oauestats_upload_data', 'oauestats_upload_data');
 }
 function oauestats_upload_data() {
     global $wpdb;
@@ -313,7 +313,7 @@ function oauestats_upload_data() {
 
     ?>
 <div class="wrap">
-<h2>Update Inductions Data</h2>
+<h2>Upload Inductions Data</h2>
 <form action="" method="post" enctype="multipart/form-data">
 <p>This requires two files exported from OALM:</p>
 <ol>
