@@ -1,0 +1,4 @@
+== Screenshots ==
+1. Completion Chart
+2. Status Chart
+3. Admin Page
