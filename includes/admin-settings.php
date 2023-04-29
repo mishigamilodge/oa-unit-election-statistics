@@ -63,247 +63,285 @@ function oauestats_upload_data() {
     // form processing code here
     // =========================
 
-    if (isset($_FILES['oauestats_inductions_file'])) {
-        if (preg_match('/\.xlsx$/', $_FILES['oauestats_inductions_file']['name'])) {
-            require_once plugin_dir_path(__FILE__) . '../vendor/autoload.php';
-
-            $objReader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
-            $objReader->setReadDataOnly(true);
-            $objReader->setLoadSheetsOnly(array("Data"));
-            $objInductSpreadsheet = $objReader->load($_FILES["oauestats_inductions_file"]["tmp_name"]);
-            $objInductWorksheet = $objInductSpreadsheet->getActiveSheet();
-            $objAdultSpreadsheet = $objReader->load($_FILES["oauestats_nominations_file"]["tmp_name"]);
-            $objAdultWorksheet = $objAdultSpreadsheet->getActiveSheet();
-            $inductColumnMap = array(
-                'Status' => 'Status',
-                'District' => 'District',
-                'Chapter' => 'Chapter',
-                'Unit Location' => 'Unit_Location',
-                'Unit Type' => 'Unit_Type',
-                'Unit Number' => 'Unit_Number',
-                'Unit Designation' => 'Unit_Designation',
-                'Unit City' => 'Unit_City',
-                'Unit State' => 'Unit_State',
-                'Unit County' => 'Unit_County',
-                'Visit Type' => 'Visit_Type',
-                'Visit Date' => 'Visit_Date',
-                'Visit Time' => 'Visit_Time',
-                'Virtual Visit' => 'Virtual_Visit',
-                'Unit Leader' => 'Unit_Leader',
-                'Unit Leader Phone' => 'Unit_Leader_Phone',
-                'Unit Leader Email' => 'Unit_Leader_Email',
-                'Requester Name' => 'Requester_Name',
-                'Requester Phone' => 'Requester_Phone',
-                'Requester Email' => 'Requester_Email',
-                'Requested Dates' => 'Requested_Dates',
-                'Elected Count' => 'Elected_Count',
-                'Announcement Status' => 'Announcement_Status',
-                'Announcement Date' => 'Announcement_Date',
-                'Posted Date' => 'Posted_Date',
-                'Approved Date' => 'Approved_Date',
-                'Callout Event' => 'Callout_Event',
-                'Welcome Event' => 'Welcome_Event',
-                'Decline Reason' => 'Decline_Reason',
-            );
-            $inductColumnSizes = array();
-            foreach ($inductColumnMap as $row => $val) {
-                $type = $wpdb->get_col($wpdb->prepare("SHOW COLUMNS FROM `${dbprefix}inductions_data` WHERE `Field` = %s", $val), 1);
-                $size = 0;
-                if (substr($type[0], 0, 7) == "varchar") {
-                    preg_match('/\((\d+)\)/', $type[0], $matches);
-                    $size = $matches[1];
-                }
-                $inductColumnSizes[$row] = $size;
-            }
-            $adultColumnMap = array(
-                'Nomination Type' => 'Nomination_Type',
-                'Nominated By' => 'Nominated_By',
-                'Nominee Full Name' => 'Nominee_Full_Name',
-                'Nomination Status' => 'Nomination_Status',
-                'BSA Person ID' => 'BSA_Person_ID',
-                'Position' => 'Position',
-            );
-            $adultColumnSizes = array();
-            foreach ($adultColumnMap as $row => $val) {
-                $type = $wpdb->get_col($wpdb->prepare("SHOW COLUMNS FROM `${dbprefix}nominations_data` WHERE `Field` = %s", $val), 1);
-                $size = 0;
-                if (substr($type[0], 0, 7) == "varchar") {
-                    preg_match('/\((\d+)\)/', $type[0], $matches);
-                    $size = $matches[1];
-                }
-                $adultColumnSizes[$row] = $size;
-            }
-            $complete = 1;
-            $inductrecordcount = 0;
-            $adultrecordcount = 0;
-            $error_output = "";
-            $oauestats_last_import = $wpdb->get_var("SELECT DATE_FORMAT(NOW(), '%Y-%m-%d')");
-
-            foreach ($objInductWorksheet->getRowIterator() as $row) {
-                $rowData = array();
-                if ($row->getRowIndex() == 1) {
-                    # this is the header row, grab the headings
-                    $cellIterator = $row->getCellIterator();
-                    $cellIterator->setIterateOnlyExistingCells(false);
-                    foreach ($cellIterator as $cell) {
-                        $cellValue = $cell->getValue();
-                        if (isset($inductColumnMap[$cellValue])) {
-                            $rowData[$inductColumnMap[$cellValue]] = 1;
-                            #echo "Found column " . esc_html($cell->getColumn()) . " with title '" . esc_html($cellValue) . "'<br>" . PHP_EOL;
-                        } else {
-                            #echo "Discarding unknown column " . esc_html($cell->getColumn()) . " with title '" . esc_html($cellValue) . "'<br>" . PHP_EOL;
-                        }
-                    }
-                    $missingColumns = array();
-                    foreach ($inductColumnMap as $key => $value) {
-                        if (!isset($rowData[$value])) {
-                            $missingColumns[] = $key;
-                        }
-                    }
-                    if ($missingColumns) {
-                        error_log("Visit data has missing columns!");
-                        ?><div class="error"><p><strong>Visit &amp; Election Management data import failed.</strong></p><p>Missing required columns: <?php esc_html_e(implode(", ", $missingColumns)) ?></div><?php
-                        $complete = 0; # Don't show "may have failed" box at the bottom
-                        break;
-                    } else {
-                        #echo "<strong>Data format validated:</strong> Importing new data...<br>" . PHP_EOL;
-                        # we just validated that we have a good data file, start handling data
-                        $wpdb->show_errors();
-                        ob_start();
-                        # Make an empty temporary table based on the inductions_data table
-                        $wpdb->query("CREATE TEMPORARY TABLE ${dbprefix}inductions_data_temp SELECT * FROM ${dbprefix}inductions_data LIMIT 0");
-                        $wpdb->query("ALTER TABLE ${dbprefix}inductions_data_temp CHANGE COLUMN `id` `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT");
-                        # now we're ready for the incoming from the rest of the file.
-                    }
-                } else {
-                    $cellIterator = $row->getCellIterator();
-                    $cellIterator->setIterateOnlyExistingCells(false);
-                    foreach ($cellIterator as $cell) {
-                        $columnName = $objInductWorksheet->getCell($cell->getColumn() . "1")->getValue();
-                        $value = "";
-                        if (in_array($columnName, ["Visit Date", "Announcement Date", "Posted Date", "Approved Date"])) {
-                            # this is a date field, but can be empty
-                            $date = $cell->getValue();
-                            if (!$date) {
-                                $value = null;
-                            } else {
-                                $dateint = intval($date);
-                                $dateintVal = (int) $dateint;
-                                $value = \PhpOffice\PhpSpreadsheet\Style\NumberFormat::toFormattedString($dateintVal, "YYYY-MM-DD");
-                            }
-                        } else {
-                            $value = $cell->getValue();
-                        }
-                        if (isset($inductColumnMap[$columnName])) {
-                            $size = $inductColumnSizes[$columnName];
-                            if ($size > 0 && $value !== null) {
-                                $value = substr($value, 0, $size);
-                            }
-                            $rowData[$inductColumnMap[$columnName]] = $value;
-                        }
-                    }
-                    if ($wpdb->insert($dbprefix . "inductions_data_temp", $rowData, array('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s'))) {
-                        $inductrecordcount++;
-                    }
-                }
-            }
-            foreach ($objAdultWorksheet->getRowIterator() as $row) {
-                $rowData = array();
-                if ($row->getRowIndex() == 1) {
-                    # this is the header row, grab the headings
-                    $cellIterator = $row->getCellIterator();
-                    $cellIterator->setIterateOnlyExistingCells(false);
-                    foreach ($cellIterator as $cell) {
-                        $cellValue = $cell->getValue();
-                        if (isset($adultColumnMap[$cellValue])) {
-                            $rowData[$adultColumnMap[$cellValue]] = 1;
-                            #echo "Found column " . esc_html($cell->getColumn()) . " with title '" . esc_html($cellValue) . "'<br>" . PHP_EOL;
-                        } else {
-                            #echo "Discarding unknown column " . esc_html($cell->getColumn()) . " with title '" . esc_html($cellValue) . "'<br>" . PHP_EOL;
-                        }
-                    }
-                    $missingColumns = array();
-                    foreach ($adultColumnMap as $key => $value) {
-                        if (!isset($rowData[$value])) {
-                            $missingColumns[] = $key;
-                        }
-                    }
-                    if ($missingColumns) {
-                        error_log("Adult data has missing columns!");
-                        ?><div class="error"><p><strong>Adult Nomination data import failed.</strong></p><p>Missing required columns: <?php esc_html_e(implode(", ", $missingColumns)) ?></div><?php
-                        $complete = 0; # Don't show "may have failed" box at the bottom
-                        break;
-                    } else {
-                        #echo "<strong>Adult Data format validated:</strong> Importing new data...<br>" . PHP_EOL;
-                        # we just validated that we have a good data file, start handling data
-                        $wpdb->show_errors();
-                        ob_start();
-                        # Make an empty temporary table based on the nominations_data table
-                        $wpdb->query("CREATE TEMPORARY TABLE ${dbprefix}nominations_data_temp SELECT * FROM ${dbprefix}nominations_data LIMIT 0");
-                        $wpdb->query("ALTER TABLE ${dbprefix}nominations_data_temp CHANGE COLUMN `id` `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT");
-                        # now we're ready for the incoming from the rest of the file.
-                    }
-                } else {
-                    $cellIterator = $row->getCellIterator();
-                    $cellIterator->setIterateOnlyExistingCells(false);
-                    foreach ($cellIterator as $cell) {
-                        $columnName = $objAdultWorksheet->getCell($cell->getColumn() . "1")->getValue();
-                        $value = "";
-                        if ($columnName == "Nominated By" && $rowData[$adultColumnMap["Nomination Type"]] === "Unit") {
-                            # this is a combined field and we need it separated. What a hack!
-                            $unitString = $cell->getValue();
-                            # Troop 538-GT - S7 - Tecumseh - Ida
-                            preg_match('/^(\S+) (\d+)(?:-(\S\S))? - (.*) - (.*?)$/', $unitString, $unitMatches);
-                            $value = $unitString;
-                            $rowData["Nominating_Unit_Type"] = $unitMatches[1];
-                            $rowData["Nominating_Unit_Number"] = $unitMatches[2];
-                            $rowData["Nominating_Unit_Designation"] = $unitMatches[3];
-                            $rowData["Nominating_Unit_Chapter"] = $unitMatches[4];
-                            $rowData["Nominating_Unit_City"] = $unitMatches[5];
-                        } else {
-                            $value = $cell->getValue();
-                        }
-                        if (isset($adultColumnMap[$columnName])) {
-                            $size = $adultColumnSizes[$columnName];
-                            if ($size > 0 && $value !== null) {
-                                $value = substr($value, 0, $size);
-                            }
-                            $rowData[$adultColumnMap[$columnName]] = $value;
-                        }
-                    }
-                    $wpdb->show_errors();
-                    if ($wpdb->insert($dbprefix . "nominations_data_temp", $rowData, array('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s'))) {
-                        $adultrecordcount++;
-                    } else {
-                        error_log(print_r($rowData, true));
-                        esc_html_e($wpdb->print_error());
-                    }
-                }
-            }
-
-            $error_output = ob_get_clean();
-            ob_start();
-            if (!$error_output) {
-                # delete the contents of the live table and copy the contents of the temp table to it
-                $wpdb->query("TRUNCATE TABLE ${dbprefix}inductions_data");
-                $wpdb->query("INSERT INTO ${dbprefix}inductions_data SELECT * FROM ${dbprefix}inductions_data_temp");
-                $wpdb->query("TRUNCATE TABLE ${dbprefix}nominations_data");
-                $wpdb->query("INSERT INTO ${dbprefix}nominations_data SELECT * FROM ${dbprefix}nominations_data_temp");
-            }
-            $error_output .= ob_get_clean();
-            if (!$error_output) {
-                update_option('oauestats_last_import', $oauestats_last_import);
-            }
-            if (!$error_output) {
-                ?><div class="updated"><p><strong>Import successful. Imported <?php esc_html_e($inductrecordcount) ?> visit records and <?php esc_html_e($adultrecordcount) ?> adult nominations.</strong></p></div><?php
+    $inductionsuploaded = isset($_FILES['oauestats_inductions_file']) && ($_FILES['oauestats_inductions_file']['size'] > 0);
+    $nominationsuploaded = isset($_FILES['oauestats_nominations_file']) && ($_FILES['oauestats_nominations_file']['size'] > 0);
+    $bothfilesuploaded = ($inductionsuploaded && $nominationsuploaded);
+    if (!$bothfilesuploaded && ($inductionsuploaded || $nominationsuploaded)) {
+        ?><div class="error"><p><strong>Both files must be uploaded.</strong></p><?php
+        if (!$inductionsuploaded) {
+            ?><p>Visit &amp; Election Management export file is missing.</p><?php
+        }
+        if (!$nominationsuploaded) {
+            ?><p>Adult Nominations export file is missing.</p><?php
+        }
+        ?></div><?php
+    }
+    $oauestats_last_import = '1900-01-01';
+    # look for correct filenames and grab the dates out of the filenames
+    if ($bothfilesuploaded) {
+    $inductionsdate = '1900-01-01';
+    $nominationsdate = '1901-01-01';
+        # 2023_UnitVisitsExport_2023_04_28.xlsx
+        if (preg_match('/UnitVisitsExport_(\d{4})_(\d{2})_(\d{2})\.xlsx$/', $_FILES['oauestats_inductions_file']['name'], $matches)) {
+            $inductions_date = $matches[1] . '-' . $matches[2] . '-' . $matches[3];
+        } else {
+            ?><div class="error"><p><strong>Incorrect file uploaded for Visit &amp; Elections Management export file.</strong><br>Please find the correct file and try again.</p></div><?php
+            $bothfilesuploaded = 0;
+        }
+        # 2023_AdultNominationsExport_2023_04_28.xlsx
+        if (preg_match('/AdultNominationsExport_(\d{4})_(\d{2})_(\d{2})\.xlsx$/', $_FILES['oauestats_nominations_file']['name'], $matches)) {
+            $nominations_date = $matches[1] . '-' . $matches[2] . '-' . $matches[3];
+        } else {
+            ?><div class="error"><p><strong>Incorrect file uploaded for Adult Nominations export file.</strong><br>Please find the correct file and try again.</p></div><?php
+            $bothfilesuploaded = 0;
+        }
+        if ($bothfilesuploaded) {
+            if ($inductions_date == $nominations_date) {
+                $oauestats_last_import = $inductions_date;
             } else {
-                ?><div class="error"><p><strong>Import failed? Imported <?php esc_html_e($inductrecordcount) ?> visit records and <?php esc_html_e($adultrecordcount) ?> adult nominations.</strong></p>
-                <p>Errors follow:</p>
-                <?php echo $error_output # this is already HTML ?>
-                </div><?php
+                ?><div class="error"><p><strong>Export files were exported on different dates.</strong><br>Both files must be exported on the same day to be used.</p></div><?php
+                $bothfilesuploaded = 0;
+            }
+        }
+    }
+    if ($bothfilesuploaded) {
+        require_once plugin_dir_path(__FILE__) . '../vendor/autoload.php';
+
+        $objReader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
+        $objReader->setReadDataOnly(true);
+        $objReader->setLoadSheetsOnly(array("Data"));
+        $objInductSpreadsheet = $objReader->load($_FILES["oauestats_inductions_file"]["tmp_name"]);
+        $objInductWorksheet = $objInductSpreadsheet->getActiveSheet();
+        $objAdultSpreadsheet = $objReader->load($_FILES["oauestats_nominations_file"]["tmp_name"]);
+        $objAdultWorksheet = $objAdultSpreadsheet->getActiveSheet();
+        $inductColumnMap = array(
+            'Status' => 'Status',
+            'District' => 'District',
+            'Chapter' => 'Chapter',
+            'Unit Location' => 'Unit_Location',
+            'Unit Type' => 'Unit_Type',
+            'Unit Number' => 'Unit_Number',
+            'Unit Designation' => 'Unit_Designation',
+            'Unit City' => 'Unit_City',
+            'Unit State' => 'Unit_State',
+            'Unit County' => 'Unit_County',
+            'Visit Type' => 'Visit_Type',
+            'Visit Date' => 'Visit_Date',
+            'Visit Time' => 'Visit_Time',
+            'Virtual Visit' => 'Virtual_Visit',
+            'Unit Leader' => 'Unit_Leader',
+            'Unit Leader Phone' => 'Unit_Leader_Phone',
+            'Unit Leader Email' => 'Unit_Leader_Email',
+            'Requester Name' => 'Requester_Name',
+            'Requester Phone' => 'Requester_Phone',
+            'Requester Email' => 'Requester_Email',
+            'Requested Dates' => 'Requested_Dates',
+            'Elected Count' => 'Elected_Count',
+            'Announcement Status' => 'Announcement_Status',
+            'Announcement Date' => 'Announcement_Date',
+            'Posted Date' => 'Posted_Date',
+            'Approved Date' => 'Approved_Date',
+            'Callout Event' => 'Callout_Event',
+            'Welcome Event' => 'Welcome_Event',
+            'Decline Reason' => 'Decline_Reason',
+        );
+        $inductColumnSizes = array();
+        foreach ($inductColumnMap as $row => $val) {
+            $type = $wpdb->get_col($wpdb->prepare("SHOW COLUMNS FROM `${dbprefix}inductions_data` WHERE `Field` = %s", $val), 1);
+            $size = 0;
+            if (substr($type[0], 0, 7) == "varchar") {
+                preg_match('/\((\d+)\)/', $type[0], $matches);
+                $size = $matches[1];
+            }
+            $inductColumnSizes[$row] = $size;
+        }
+        $adultColumnMap = array(
+            'Nomination Type' => 'Nomination_Type',
+            'Nominated By' => 'Nominated_By',
+            'Nominee Full Name' => 'Nominee_Full_Name',
+            'Nomination Status' => 'Nomination_Status',
+            'BSA Person ID' => 'BSA_Person_ID',
+            'Position' => 'Position',
+        );
+        $adultColumnSizes = array();
+        foreach ($adultColumnMap as $row => $val) {
+            $type = $wpdb->get_col($wpdb->prepare("SHOW COLUMNS FROM `${dbprefix}nominations_data` WHERE `Field` = %s", $val), 1);
+            $size = 0;
+            if (substr($type[0], 0, 7) == "varchar") {
+                preg_match('/\((\d+)\)/', $type[0], $matches);
+                $size = $matches[1];
+            }
+            $adultColumnSizes[$row] = $size;
+        }
+        $complete = 1;
+        $inductrecordcount = 0;
+        $adultrecordcount = 0;
+        $error_output = "";
+
+        foreach ($objInductWorksheet->getRowIterator() as $row) {
+            $rowData = array();
+            if ($row->getRowIndex() == 1) {
+                # this is the header row, grab the headings
+                $cellIterator = $row->getCellIterator();
+                $cellIterator->setIterateOnlyExistingCells(false);
+                foreach ($cellIterator as $cell) {
+                    $cellValue = $cell->getValue();
+                    if (isset($inductColumnMap[$cellValue])) {
+                        $rowData[$inductColumnMap[$cellValue]] = 1;
+                        #echo "Found column " . esc_html($cell->getColumn()) . " with title '" . esc_html($cellValue) . "'<br>" . PHP_EOL;
+                    } else {
+                        #echo "Discarding unknown column " . esc_html($cell->getColumn()) . " with title '" . esc_html($cellValue) . "'<br>" . PHP_EOL;
+                    }
+                }
+                $missingColumns = array();
+                foreach ($inductColumnMap as $key => $value) {
+                    if (!isset($rowData[$value])) {
+                        $missingColumns[] = $key;
+                    }
+                }
+                if ($missingColumns) {
+                    error_log("Visit data has missing columns!");
+                    ?><div class="error"><p><strong>Visit &amp; Election Management data import failed.</strong></p><p>Missing required columns: <?php esc_html_e(implode(", ", $missingColumns)) ?></div><?php
+                    $complete = 0; # Don't show "may have failed" box at the bottom
+                    break;
+                } else {
+                    #echo "<strong>Data format validated:</strong> Importing new data...<br>" . PHP_EOL;
+                    # we just validated that we have a good data file, start handling data
+                    $wpdb->show_errors();
+                    ob_start();
+                    # Make an empty temporary table based on the inductions_data table
+                    $wpdb->query("CREATE TEMPORARY TABLE ${dbprefix}inductions_data_temp SELECT * FROM ${dbprefix}inductions_data LIMIT 0");
+                    $wpdb->query("ALTER TABLE ${dbprefix}inductions_data_temp CHANGE COLUMN `id` `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT");
+                    # now we're ready for the incoming from the rest of the file.
+                }
+            } else {
+                $cellIterator = $row->getCellIterator();
+                $cellIterator->setIterateOnlyExistingCells(false);
+                foreach ($cellIterator as $cell) {
+                    $columnName = $objInductWorksheet->getCell($cell->getColumn() . "1")->getValue();
+                    $value = "";
+                    if (in_array($columnName, ["Visit Date", "Announcement Date", "Posted Date", "Approved Date"])) {
+                        # this is a date field, but can be empty
+                        $date = $cell->getValue();
+                        if (!$date) {
+                            $value = null;
+                        } else {
+                            $dateint = intval($date);
+                            $dateintVal = (int) $dateint;
+                            $value = \PhpOffice\PhpSpreadsheet\Style\NumberFormat::toFormattedString($dateintVal, "YYYY-MM-DD");
+                        }
+                    } else {
+                        $value = $cell->getValue();
+                    }
+                    if (isset($inductColumnMap[$columnName])) {
+                        $size = $inductColumnSizes[$columnName];
+                        if ($size > 0 && $value !== null) {
+                            $value = substr($value, 0, $size);
+                        }
+                        $rowData[$inductColumnMap[$columnName]] = $value;
+                    }
+                }
+                if ($wpdb->insert($dbprefix . "inductions_data_temp", $rowData, array('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s'))) {
+                    $inductrecordcount++;
+                }
+            }
+        }
+        foreach ($objAdultWorksheet->getRowIterator() as $row) {
+            $rowData = array();
+            if ($row->getRowIndex() == 1) {
+                # this is the header row, grab the headings
+                $cellIterator = $row->getCellIterator();
+                $cellIterator->setIterateOnlyExistingCells(false);
+                foreach ($cellIterator as $cell) {
+                    $cellValue = $cell->getValue();
+                    if (isset($adultColumnMap[$cellValue])) {
+                        $rowData[$adultColumnMap[$cellValue]] = 1;
+                        #echo "Found column " . esc_html($cell->getColumn()) . " with title '" . esc_html($cellValue) . "'<br>" . PHP_EOL;
+                    } else {
+                        #echo "Discarding unknown column " . esc_html($cell->getColumn()) . " with title '" . esc_html($cellValue) . "'<br>" . PHP_EOL;
+                    }
+                }
+                $missingColumns = array();
+                foreach ($adultColumnMap as $key => $value) {
+                    if (!isset($rowData[$value])) {
+                        $missingColumns[] = $key;
+                    }
+                }
+                if ($missingColumns) {
+                    error_log("Adult data has missing columns!");
+                    ?><div class="error"><p><strong>Adult Nomination data import failed.</strong></p><p>Missing required columns: <?php esc_html_e(implode(", ", $missingColumns)) ?></div><?php
+                    $complete = 0; # Don't show "may have failed" box at the bottom
+                    break;
+                } else {
+                    #echo "<strong>Adult Data format validated:</strong> Importing new data...<br>" . PHP_EOL;
+                    # we just validated that we have a good data file, start handling data
+                    $wpdb->show_errors();
+                    ob_start();
+                    # Make an empty temporary table based on the nominations_data table
+                    $wpdb->query("CREATE TEMPORARY TABLE ${dbprefix}nominations_data_temp SELECT * FROM ${dbprefix}nominations_data LIMIT 0");
+                    $wpdb->query("ALTER TABLE ${dbprefix}nominations_data_temp CHANGE COLUMN `id` `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT");
+                    # now we're ready for the incoming from the rest of the file.
+                }
+            } else {
+                $cellIterator = $row->getCellIterator();
+                $cellIterator->setIterateOnlyExistingCells(false);
+                foreach ($cellIterator as $cell) {
+                    $columnName = $objAdultWorksheet->getCell($cell->getColumn() . "1")->getValue();
+                    $value = "";
+                    if ($columnName == "Nominated By" && $rowData[$adultColumnMap["Nomination Type"]] === "Unit") {
+                        # this is a combined field and we need it separated. What a hack!
+                        $unitString = $cell->getValue();
+                        # Troop 538-GT - S7 - Tecumseh - Ida
+                        preg_match('/^(\S+) (\d+)(?:-(\S\S))? - (.*) - (.*?)$/', $unitString, $unitMatches);
+                        $value = $unitString;
+                        $rowData["Nominating_Unit_Type"] = $unitMatches[1];
+                        $rowData["Nominating_Unit_Number"] = $unitMatches[2];
+                        $rowData["Nominating_Unit_Designation"] = $unitMatches[3];
+                        $rowData["Nominating_Unit_Chapter"] = $unitMatches[4];
+                        $rowData["Nominating_Unit_City"] = $unitMatches[5];
+                    } else {
+                        $value = $cell->getValue();
+                    }
+                    if (isset($adultColumnMap[$columnName])) {
+                        $size = $adultColumnSizes[$columnName];
+                        if ($size > 0 && $value !== null) {
+                            $value = substr($value, 0, $size);
+                        }
+                        $rowData[$adultColumnMap[$columnName]] = $value;
+                    }
+                }
+                $wpdb->show_errors();
+                if ($wpdb->insert($dbprefix . "nominations_data_temp", $rowData, array('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s'))) {
+                    $adultrecordcount++;
+                } else {
+                    error_log(print_r($rowData, true));
+                    esc_html_e($wpdb->print_error());
+                }
+            }
+        }
+
+        $error_output = ob_get_clean();
+        ob_start();
+        if (!$error_output) {
+            # delete the contents of the live table and copy the contents of the temp table to it
+            $wpdb->query("TRUNCATE TABLE ${dbprefix}inductions_data");
+            $wpdb->query("INSERT INTO ${dbprefix}inductions_data SELECT * FROM ${dbprefix}inductions_data_temp");
+            $wpdb->query("TRUNCATE TABLE ${dbprefix}nominations_data");
+            $wpdb->query("INSERT INTO ${dbprefix}nominations_data SELECT * FROM ${dbprefix}nominations_data_temp");
+        }
+        $error_output .= ob_get_clean();
+        if (!$error_output) {
+            update_option('oauestats_last_import', $oauestats_last_import);
+        }
+        if (!$error_output) {
+            if ($complete) {
+                ?><div class="updated"><p><strong>Import successful. Imported <?php esc_html_e($inductrecordcount) ?> visit records and <?php esc_html_e($adultrecordcount) ?> adult nominations.</strong></p></div><?php
             }
         } else {
-            ?><div class="error"><p><strong>Invalid file upload.</strong> Not an XLSX file.</p></div><?php
+            ?><div class="error"><p><strong>Import failed? Imported <?php esc_html_e($inductrecordcount) ?> visit records and <?php esc_html_e($adultrecordcount) ?> adult nominations.</strong></p>
+            <p>Errors follow:</p>
+            <?php echo $error_output # this is already HTML ?>
+            </div><?php
         }
     }
 
