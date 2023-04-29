@@ -19,7 +19,7 @@
 
 add_shortcode( 'oauestats_status_chart', 'oauestats_status_chart' );
 function oauestats_status_chart() {
-    wp_enqueue_script( 'Chart-js', 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.bundle.min.js');
+    wp_enqueue_script( 'Chart-js-294', 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.bundle.min.js');
     wp_enqueue_style('oauestats_chart_colors', plugins_url('css/chart-colors.css', dirname(__FILE__)));
     global $wpdb;
     $dbprefix = $wpdb->prefix . "oauestats_";
