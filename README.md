@@ -29,3 +29,8 @@ Each chart or table is a shortcode. You can place the shortcode wherever you wan
 <dt><code>[oauestats_unit_totals]</code></dt>
 <dd>Generates a table separated by chapter listing all of the units who have submitted election reports, listing how many youth were elected, how many adults they're eligible for, how many adults have been nominated so far, and how many adults they can still nominate, with a subtotal for each chapter.</dd>
 </dl>
+
+## TODO before this can be considered production quality:
+
+* Update it to use a modern version of Chart.js. I had already working code using an older version so used it in the rush to get it working. The newer version of Chart.js has breaking changes in a few of the APIs I'm using, so it'll need some of the code re-written to use it properly.
+* Outfit the plugin with the tooling for WordPress to be able to detect its version and auto-update it.
