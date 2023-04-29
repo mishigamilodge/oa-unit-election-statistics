@@ -3,7 +3,7 @@
  * Plugin Name: OA Unit Election Statistics
  * Plugin URI: https://github.com/mishigamilodge/oa-unit-election-statistics
  * Description: Upload data from your Inductions module and see pretty graphs
- * Version: 1.0
+ * Version: 1.1
  * Requires at least: 5.2
  * Tested up to: 6.2
  * Requires PHP: 7.4

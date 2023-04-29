@@ -1,4 +1,4 @@
-#### unreleased
+#### 1.1 / 2023-04-29
 
 * Add lodge-wide totals at bottom of Adult Nomination Eligibility
 * Use consistent widths for Adult Nom. Elig. columns
