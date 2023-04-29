@@ -12,6 +12,10 @@ jobs:
     - name: Get Version Number
       uses: WyriHaximus/github-action-get-previous-tag@v1
       id: lasttag
+    - uses: php-actions/composer@v6
+      with:
+        php_version: 7.4
+        php_extensions: gd zip
     - name: Generate wordpress.org assets
       run: /bin/bash ${PWD}/.github/bin/make-readmetxt.sh
 ### Uncomment the following once approved for WordPress.org Plugin Directory
