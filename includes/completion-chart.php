@@ -62,7 +62,7 @@ function oauestats_completion_chart() {
 </div>
 <script type="text/javascript">
 var $j = jQuery.noConflict();
-function oauestats_<?php esc_html_e($unique_token) ?>_fixalpha(color, newalpha) {
+function oauestats_<?php echo esc_js($unique_token) ?>_fixalpha(color, newalpha) {
     var pat = /^rgba?\((\d+),\s*(\d+),\s*(\d+)/;
     var m = pat.exec(color);
     return "rgba(" + m[1] + ", " + m[2] + ", " + m[3] + ", " + newalpha + ")";
@@ -74,7 +74,7 @@ function oauestats_<?php esc_html_e($unique_token) ?>_fixalpha(color, newalpha) 
     $labellist[] = 'Entire Lodge';
 ?>
 $j(document).ready(function(){
-var oauestats_<?php esc_html_e($unique_token) ?>_chartconfig = {
+var oauestats_<?php echo esc_js($unique_token) ?>_chartconfig = {
     type: 'bar',
     data: {
         labels: <?php echo wp_json_encode($labellist); ?>,
@@ -88,14 +88,14 @@ var oauestats_<?php esc_html_e($unique_token) ?>_chartconfig = {
                 $obj = $chapters[$chapter];
                 if ($count > 0) { echo ","; };
                 $num = $obj->declined + $obj->posted + $obj->approved;
-                echo esc_html(($num / $obj->total) * 100);
+                echo esc_js(($num / $obj->total) * 100);
                 $count++;
                 $total = $total + $num;
             }
-            echo "," . esc_html(($total / $totalunits) * 100);
+            echo "," . esc_js(($total / $totalunits) * 100);
             ?>],
-            backgroundColor: oauestats_<?php esc_html_e($unique_token) ?>_fixalpha($j(".oauestats_approved").css("background-color"), 0.2),
-            borderColor: oauestats_<?php esc_html_e($unique_token) ?>_fixalpha($j(".oauestats_approved").css("background-color"), 1),
+            backgroundColor: oauestats_<?php echo esc_js($unique_token) ?>_fixalpha($j(".oauestats_approved").css("background-color"), 0.2),
+            borderColor: oauestats_<?php echo esc_js($unique_token) ?>_fixalpha($j(".oauestats_approved").css("background-color"), 1),
             borderWidth: 1
         },
         {
@@ -107,14 +107,14 @@ var oauestats_<?php esc_html_e($unique_token) ?>_chartconfig = {
                 $obj = $chapters[$chapter];
                 if ($count > 0) { echo ","; };
                 $num = $obj->pastdue + $obj->sched + $obj->requested + $obj->notsched;
-                echo esc_html(($num / $obj->total) * 100);
+                echo esc_js(($num / $obj->total) * 100);
                 $count++;
                 $total = $total + $num;
             }
-            echo "," . esc_html(($total / $totalunits) * 100);
+            echo "," . esc_js(($total / $totalunits) * 100);
             ?>],
-            backgroundColor: oauestats_<?php esc_html_e($unique_token) ?>_fixalpha($j(".oauestats_notscheduled").css("background-color"), 0.2),
-            borderColor: oauestats_<?php esc_html_e($unique_token) ?>_fixalpha($j(".oauestats_notscheduled").css("background-color"), 1),
+            backgroundColor: oauestats_<?php echo esc_js($unique_token) ?>_fixalpha($j(".oauestats_notscheduled").css("background-color"), 0.2),
+            borderColor: oauestats_<?php echo esc_js($unique_token) ?>_fixalpha($j(".oauestats_notscheduled").css("background-color"), 1),
             borderWidth: 1
         }
         ]
@@ -160,7 +160,7 @@ var oauestats_<?php esc_html_e($unique_token) ?>_chartconfig = {
     }
 };
 
-var oauestats_<?php esc_html_e($unique_token) ?>_chart = new Chart($j("#oauestats_<?php esc_html_e($unique_token) ?>_ElectionChart"), oauestats_<?php esc_html_e($unique_token) ?>_chartconfig);
+var oauestats_<?php echo esc_js($unique_token) ?>_chart = new Chart($j("#oauestats_<?php echo esc_js($unique_token) ?>_ElectionChart"), oauestats_<?php echo esc_js($unique_token) ?>_chartconfig);
 });
 </script>
     <?php

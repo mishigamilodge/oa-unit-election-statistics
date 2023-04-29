@@ -62,7 +62,7 @@ function oauestats_status_chart() {
 </div>
 <script type="text/javascript">
 var $j = jQuery.noConflict();
-function oauestats_<?php esc_html_e($unique_token) ?>_fixalpha(color, newalpha) {
+function oauestats_<?php echo esc_js($unique_token) ?>_fixalpha(color, newalpha) {
     var pat = /^rgba?\((\d+),\s*(\d+),\s*(\d+)/;
     var m = pat.exec(color);
     return "rgba(" + m[1] + ", " + m[2] + ", " + m[3] + ", " + newalpha + ")";
@@ -74,7 +74,7 @@ function oauestats_<?php esc_html_e($unique_token) ?>_fixalpha(color, newalpha) 
     $labellist[] = 'Entire Lodge';
 ?>
 $j(document).ready(function(){
-var oauestats_<?php esc_html_e($unique_token) ?>_chartconfig = {
+var oauestats_<?php echo esc_js($unique_token) ?>_chartconfig = {
     type: 'bar',
     data: {
         labels: <?php echo wp_json_encode($labellist); ?>,
@@ -87,14 +87,14 @@ var oauestats_<?php esc_html_e($unique_token) ?>_chartconfig = {
             foreach ($chapterlist AS $chapter) {
                 $obj = $chapters[$chapter];
                 if ($count > 0) { echo ","; };
-                echo esc_html(($obj->declined / $obj->total) * 100);
+                echo esc_js(($obj->declined / $obj->total) * 100);
                 $count++;
                 $total = $total + $obj->declined;
             }
-            echo "," . esc_html(($total / $totalunits) * 100);
+            echo "," . esc_js(($total / $totalunits) * 100);
             ?>],
-            backgroundColor: oauestats_<?php esc_html_e($unique_token) ?>_fixalpha($j(".oauestats_declined").css("background-color"), 0.2),
-            borderColor: oauestats_<?php esc_html_e($unique_token) ?>_fixalpha($j(".oauestats_declined").css("background-color"), 1),
+            backgroundColor: oauestats_<?php echo esc_js($unique_token) ?>_fixalpha($j(".oauestats_declined").css("background-color"), 0.2),
+            borderColor: oauestats_<?php echo esc_js($unique_token) ?>_fixalpha($j(".oauestats_declined").css("background-color"), 1),
             borderWidth: 1
         },
         {
@@ -105,14 +105,14 @@ var oauestats_<?php esc_html_e($unique_token) ?>_chartconfig = {
             foreach ($chapterlist AS $chapter) {
                 $obj = $chapters[$chapter];
                 if ($count > 0) { echo ","; };
-                echo esc_html(($obj->approved / $obj->total) * 100);
+                echo esc_js(($obj->approved / $obj->total) * 100);
                 $count++;
                 $total = $total + $obj->approved;
             }
-            echo "," . esc_html(($total / $totalunits) * 100);
+            echo "," . esc_js(($total / $totalunits) * 100);
             ?>],
-            backgroundColor: oauestats_<?php esc_html_e($unique_token) ?>_fixalpha($j(".oauestats_approved").css("background-color"), 0.2),
-            borderColor: oauestats_<?php esc_html_e($unique_token) ?>_fixalpha($j(".oauestats_approved").css("background-color"), 1),
+            backgroundColor: oauestats_<?php echo esc_js($unique_token) ?>_fixalpha($j(".oauestats_approved").css("background-color"), 0.2),
+            borderColor: oauestats_<?php echo esc_js($unique_token) ?>_fixalpha($j(".oauestats_approved").css("background-color"), 1),
             borderWidth: 1
         },
         {
@@ -123,14 +123,14 @@ var oauestats_<?php esc_html_e($unique_token) ?>_chartconfig = {
             foreach ($chapterlist AS $chapter) {
                 $obj = $chapters[$chapter];
                 if ($count > 0) { echo ","; };
-                echo esc_html(($obj->posted / $obj->total) * 100);
+                echo esc_js(($obj->posted / $obj->total) * 100);
                 $count++;
                 $total = $total + $obj->posted;
             }
-            echo "," . esc_html(($total / $totalunits) * 100);
+            echo "," . esc_js(($total / $totalunits) * 100);
             ?>],
-            backgroundColor: oauestats_<?php esc_html_e($unique_token) ?>_fixalpha($j(".oauestats_posted").css("background-color"), 0.2),
-            borderColor: oauestats_<?php esc_html_e($unique_token) ?>_fixalpha($j(".oauestats_posted").css("background-color"), 1),
+            backgroundColor: oauestats_<?php echo esc_js($unique_token) ?>_fixalpha($j(".oauestats_posted").css("background-color"), 0.2),
+            borderColor: oauestats_<?php echo esc_js($unique_token) ?>_fixalpha($j(".oauestats_posted").css("background-color"), 1),
             borderWidth: 1
         },
         {
@@ -141,14 +141,14 @@ var oauestats_<?php esc_html_e($unique_token) ?>_chartconfig = {
             foreach ($chapterlist AS $chapter) {
                 $obj = $chapters[$chapter];
                 if ($count > 0) { echo ","; };
-                echo esc_html(($obj->pastdue / $obj->total) * 100);
+                echo esc_js(($obj->pastdue / $obj->total) * 100);
                 $count++;
                 $total = $total + $obj->pastdue;
             }
-            echo "," . esc_html(($total / $totalunits) * 100);
+            echo "," . esc_js(($total / $totalunits) * 100);
             ?>],
-            backgroundColor: oauestats_<?php esc_html_e($unique_token) ?>_fixalpha($j(".oauestats_pastdue").css("background-color"), 0.2),
-            borderColor: oauestats_<?php esc_html_e($unique_token) ?>_fixalpha($j(".oauestats_pastdue").css("background-color"), 1),
+            backgroundColor: oauestats_<?php echo esc_js($unique_token) ?>_fixalpha($j(".oauestats_pastdue").css("background-color"), 0.2),
+            borderColor: oauestats_<?php echo esc_js($unique_token) ?>_fixalpha($j(".oauestats_pastdue").css("background-color"), 1),
             borderWidth: 1
         },
         {
@@ -159,14 +159,14 @@ var oauestats_<?php esc_html_e($unique_token) ?>_chartconfig = {
             foreach ($chapterlist AS $chapter) {
                 $obj = $chapters[$chapter];
                 if ($count > 0) { echo ","; };
-                echo esc_html(($obj->sched / $obj->total) * 100);
+                echo esc_js(($obj->sched / $obj->total) * 100);
                 $count++;
                 $total = $total + $obj->sched;
             }
-            echo "," . esc_html(($total / $totalunits) * 100);
+            echo "," . esc_js(($total / $totalunits) * 100);
             ?>],
-            backgroundColor: oauestats_<?php esc_html_e($unique_token) ?>_fixalpha($j(".oauestats_scheduled").css("background-color"), 0.2),
-            borderColor: oauestats_<?php esc_html_e($unique_token) ?>_fixalpha($j(".oauestats_scheduled").css("background-color"), 1),
+            backgroundColor: oauestats_<?php echo esc_js($unique_token) ?>_fixalpha($j(".oauestats_scheduled").css("background-color"), 0.2),
+            borderColor: oauestats_<?php echo esc_js($unique_token) ?>_fixalpha($j(".oauestats_scheduled").css("background-color"), 1),
             borderWidth: 1
         },
         {
@@ -177,14 +177,14 @@ var oauestats_<?php esc_html_e($unique_token) ?>_chartconfig = {
             foreach ($chapterlist AS $chapter) {
                 $obj = $chapters[$chapter];
                 if ($count > 0) { echo ","; };
-                echo esc_html(($obj->requested / $obj->total) * 100);
+                echo esc_js(($obj->requested / $obj->total) * 100);
                 $count++;
                 $total = $total + $obj->requested;
             }
-            echo "," . esc_html(($total / $totalunits) * 100);
+            echo "," . esc_js(($total / $totalunits) * 100);
             ?>],
-            backgroundColor: oauestats_<?php esc_html_e($unique_token) ?>_fixalpha($j(".oauestats_requested").css("background-color"), 0.2),
-            borderColor: oauestats_<?php esc_html_e($unique_token) ?>_fixalpha($j(".oauestats_requested").css("background-color"), 1),
+            backgroundColor: oauestats_<?php echo esc_js($unique_token) ?>_fixalpha($j(".oauestats_requested").css("background-color"), 0.2),
+            borderColor: oauestats_<?php echo esc_js($unique_token) ?>_fixalpha($j(".oauestats_requested").css("background-color"), 1),
             borderWidth: 1
         },
         {
@@ -195,14 +195,14 @@ var oauestats_<?php esc_html_e($unique_token) ?>_chartconfig = {
             foreach ($chapterlist AS $chapter) {
                 $obj = $chapters[$chapter];
                 if ($count > 0) { echo ","; };
-                echo esc_html(($obj->notsched / $obj->total) * 100);
+                echo esc_js(($obj->notsched / $obj->total) * 100);
                 $count++;
                 $total = $total + $obj->notsched;
             }
-            echo "," . esc_html(($total / $totalunits) * 100);
+            echo "," . esc_js(($total / $totalunits) * 100);
             ?>],
-            backgroundColor: oauestats_<?php esc_html_e($unique_token) ?>_fixalpha($j(".oauestats_notscheduled").css("background-color"), 0.2),
-            borderColor: oauestats_<?php esc_html_e($unique_token) ?>_fixalpha($j(".oauestats_notscheduled").css("background-color"), 1),
+            backgroundColor: oauestats_<?php echo esc_js($unique_token) ?>_fixalpha($j(".oauestats_notscheduled").css("background-color"), 0.2),
+            borderColor: oauestats_<?php echo esc_js($unique_token) ?>_fixalpha($j(".oauestats_notscheduled").css("background-color"), 1),
             borderWidth: 1
         }
         ]
@@ -248,7 +248,7 @@ var oauestats_<?php esc_html_e($unique_token) ?>_chartconfig = {
     }
 };
 
-var oauestats_<?php esc_html_e($unique_token) ?>_chart = new Chart($j("#oauestats_<?php esc_html_e($unique_token) ?>_ElectionChart"), oauestats_<?php esc_html_e($unique_token) ?>_chartconfig);
+var oauestats_<?php echo esc_js($unique_token) ?>_chart = new Chart($j("#oauestats_<?php echo esc_js($unique_token) ?>_ElectionChart"), oauestats_<?php echo esc_js($unique_token) ?>_chartconfig);
 });
 </script>
     <?php

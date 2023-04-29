@@ -202,7 +202,7 @@ function oauestats_upload_data() {
                 if ($missingColumns) {
                     error_log("Visit data has missing columns!");
                     ?><div class="error"><p><strong>Visit &amp; Election Management data import failed.</strong></p><p>Missing required columns: <?php esc_html_e(implode(", ", $missingColumns)) ?></div><?php
-                    $complete = 0; # Don't show "may have failed" box at the bottom
+                    $complete = 0; # Don't show success box at the bottom
                     break;
                 } else {
                     #echo "<strong>Data format validated:</strong> Importing new data...<br>" . PHP_EOL;
@@ -210,8 +210,9 @@ function oauestats_upload_data() {
                     $wpdb->show_errors();
                     ob_start();
                     # Make an empty temporary table based on the inductions_data table
-                    $wpdb->query("CREATE TEMPORARY TABLE ${dbprefix}inductions_data_temp SELECT * FROM ${dbprefix}inductions_data LIMIT 0");
-                    $wpdb->query("ALTER TABLE ${dbprefix}inductions_data_temp CHANGE COLUMN `id` `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT");
+                    $wpdb->query("CREATE TEMPORARY TABLE `${dbprefix}inductions_data_temp` SELECT * FROM `${dbprefix}inductions_data` LIMIT 0");
+                    # cloning the table doesn't clone the auto-increment, so have to set that up manually
+                    $wpdb->query("ALTER TABLE `${dbprefix}inductions_data_temp` CHANGE COLUMN `id` `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT");
                     # now we're ready for the incoming from the rest of the file.
                 }
             } else {
@@ -226,6 +227,7 @@ function oauestats_upload_data() {
                         if (!$date) {
                             $value = null;
                         } else {
+                            # convert the date into something MySQL can recognize
                             $dateint = intval($date);
                             $dateintVal = (int) $dateint;
                             $value = \PhpOffice\PhpSpreadsheet\Style\NumberFormat::toFormattedString($dateintVal, "YYYY-MM-DD");
@@ -233,8 +235,11 @@ function oauestats_upload_data() {
                     } else {
                         $value = $cell->getValue();
                     }
-                    if (isset($inductColumnMap[$columnName])) {
+                    if (isset($inductColumnSizes[$columnName])) {
                         $size = $inductColumnSizes[$columnName];
+                        # WordPress will choke if we try to insert something
+                        # bigger than the column in MySQL, so truncate anything
+                        # that's too big.
                         if ($size > 0 && $value !== null) {
                             $value = substr($value, 0, $size);
                         }
@@ -270,7 +275,7 @@ function oauestats_upload_data() {
                 if ($missingColumns) {
                     error_log("Adult data has missing columns!");
                     ?><div class="error"><p><strong>Adult Nomination data import failed.</strong></p><p>Missing required columns: <?php esc_html_e(implode(", ", $missingColumns)) ?></div><?php
-                    $complete = 0; # Don't show "may have failed" box at the bottom
+                    $complete = 0; # Don't show success box at the bottom
                     break;
                 } else {
                     #echo "<strong>Adult Data format validated:</strong> Importing new data...<br>" . PHP_EOL;
@@ -278,8 +283,9 @@ function oauestats_upload_data() {
                     $wpdb->show_errors();
                     ob_start();
                     # Make an empty temporary table based on the nominations_data table
-                    $wpdb->query("CREATE TEMPORARY TABLE ${dbprefix}nominations_data_temp SELECT * FROM ${dbprefix}nominations_data LIMIT 0");
-                    $wpdb->query("ALTER TABLE ${dbprefix}nominations_data_temp CHANGE COLUMN `id` `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT");
+                    $wpdb->query("CREATE TEMPORARY TABLE `${dbprefix}nominations_data_temp` SELECT * FROM `${dbprefix}nominations_data` LIMIT 0");
+                    # cloning the table doesn't clone the auto-increment, so have to set that up manually
+                    $wpdb->query("ALTER TABLE `${dbprefix}nominations_data_temp` CHANGE COLUMN `id` `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT");
                     # now we're ready for the incoming from the rest of the file.
                 }
             } else {
@@ -292,6 +298,11 @@ function oauestats_upload_data() {
                         # this is a combined field and we need it separated. What a hack!
                         $unitString = $cell->getValue();
                         # Troop 538-GT - S7 - Tecumseh - Ida
+                        # 1: 1st word
+                        # 2: 1 or more digits
+                        # 3: optionally, a hyphen followed by two characters (don't include hyphen in the match)
+                        # 4: greedy match everything that's between the first and last ' - '
+                        # 5: non-greedy match everything after the last ' - '
                         preg_match('/^(\S+) (\d+)(?:-(\S\S))? - (.*) - (.*?)$/', $unitString, $unitMatches);
                         $value = $unitString;
                         $rowData["Nominating_Unit_Type"] = $unitMatches[1];
@@ -302,8 +313,11 @@ function oauestats_upload_data() {
                     } else {
                         $value = $cell->getValue();
                     }
-                    if (isset($adultColumnMap[$columnName])) {
+                    if (isset($adultColumnSizes[$columnName])) {
                         $size = $adultColumnSizes[$columnName];
+                        # WordPress will choke if we try to insert something
+                        # bigger than the column in MySQL, so truncate anything
+                        # that's too big.
                         if ($size > 0 && $value !== null) {
                             $value = substr($value, 0, $size);
                         }
@@ -324,10 +338,12 @@ function oauestats_upload_data() {
         ob_start();
         if (!$error_output) {
             # delete the contents of the live table and copy the contents of the temp table to it
-            $wpdb->query("TRUNCATE TABLE ${dbprefix}inductions_data");
-            $wpdb->query("INSERT INTO ${dbprefix}inductions_data SELECT * FROM ${dbprefix}inductions_data_temp");
-            $wpdb->query("TRUNCATE TABLE ${dbprefix}nominations_data");
-            $wpdb->query("INSERT INTO ${dbprefix}nominations_data SELECT * FROM ${dbprefix}nominations_data_temp");
+            $wpdb->query("TRUNCATE TABLE `${dbprefix}inductions_data`");
+            $wpdb->query("INSERT INTO `${dbprefix}inductions_data` SELECT * FROM `${dbprefix}inductions_data_temp`");
+            $wpdb->query("DROP TABLE `${dbprefix}inductions_data_temp`");
+            $wpdb->query("TRUNCATE TABLE `${dbprefix}nominations_data`");
+            $wpdb->query("INSERT INTO `${dbprefix}nominations_data` SELECT * FROM `${dbprefix}nominations_data_temp`");
+            $wpdb->query("DROP TABLE `${dbprefix}nominations_data_temp`");
         }
         $error_output .= ob_get_clean();
         if (!$error_output) {
@@ -340,7 +356,7 @@ function oauestats_upload_data() {
         } else {
             ?><div class="error"><p><strong>Import failed? Imported <?php esc_html_e($inductrecordcount) ?> visit records and <?php esc_html_e($adultrecordcount) ?> adult nominations.</strong></p>
             <p>Errors follow:</p>
-            <?php echo $error_output # this is already HTML ?>
+            <?php echo wp_kses($error_output) # this is already HTML ?>
             </div><?php
         }
     }
