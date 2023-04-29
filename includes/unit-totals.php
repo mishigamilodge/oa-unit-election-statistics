@@ -55,6 +55,10 @@ ORDER BY `Chapter`, `Unit_Type`, `Unit_Number`, `Unit_Designation` ASC
 <?php
     $curchapter = '';
     $tablestarted = 0;
+    $lodgeyouthcount = 0;
+    $lodgeadultslotcount = 0;
+    $lodgeadultcount = 0;
+    $lodgeadultremaincount = 0;
     $youthcount = 0;
     $adultslotcount = 0;
     $adultcount = 0;
@@ -101,6 +105,10 @@ ORDER BY `Chapter`, `Unit_Type`, `Unit_Number`, `Unit_Designation` ASC
         $adultslotcount += $adultslots;
         $adultcount += $obj->Nominated_Count;
         $adultremaincount += $adultsremain;
+        $lodgeyouthcount += $obj->Elected_Count;
+        $lodgeadultslotcount += $adultslots;
+        $lodgeadultcount += $obj->Nominated_Count;
+        $lodgeadultremaincount += $adultsremain;
         ?><tr>
 <th><?php esc_html_e($unit) ?></th>
 <td><?php esc_html_e($obj->Elected_Count) ?></td>
@@ -117,12 +125,23 @@ ORDER BY `Chapter`, `Unit_Type`, `Unit_Number`, `Unit_Designation` ASC
 <th><?php esc_html_e($adultslotcount) ?></th>
 <th><?php esc_html_e($adultcount) ?></th>
 <th><?php esc_html_e($adultremaincount) ?></th>
-</tr><?php
-    } ?>
+</tr>
 </tbody></table><?php
-    ?></tbody></table><?php
-
-?><p>Data last updated: <?php esc_html_e(get_option("oauestats_last_import")); ?></p>
+    } ?>
+<table class="oauestats_table">
+<thead>
+<tr><th></th><th>Youth Elected</th><th>Adults Slots Available</th><th>Adults Nominated</th><th>Adults Remaining</th></tr>
+</thead>
+<tbody>
+<tr>
+<th>Lodge Totals:</th>
+<th><?php esc_html_e($lodgeyouthcount) ?></th>
+<th><?php esc_html_e($lodgeadultslotcount) ?></th>
+<th><?php esc_html_e($lodgeadultcount) ?></th>
+<th><?php esc_html_e($lodgeadultremaincount) ?></th>
+</tr>
+</tbody></table>
+<p>Data last updated: <?php esc_html_e(get_option("oauestats_last_import")); ?></p>
     <?php
     return ob_get_clean();
 }
