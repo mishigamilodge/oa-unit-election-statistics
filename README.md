@@ -18,4 +18,14 @@ This is NOT ready for a general release yet. If you use it before it's ready, yo
 1. Go to **OA Tools > Import Inductions Data** in the WordPress admin, and follow the instructions there to import data from LodgeMaster.
 1. Create one or more pages for your charts or tables, and put the shortcodes where you want them to show up.
 
+## Usage
 
+Each chart or table is a shortcode. You can place the shortcode wherever you want that chart or table to show up, in pages or in posts.  Note that the data will update as you load newer data from LodgeMaster, even if put in a news post with a post date on it.
+<dl>
+<dt><code>[oauestats_completion_chart]</code></dt>
+<dd>Generates a horizontal bar chart of all of your chapters with a bar at the bottom for the entire lodge, which shows the percentage of units which are considered to have completed their election within each chapter and the lodge.</dd>
+<dt><code>[oauestats_status_chart]</code></dt>
+<dd>Generates a horizontal bar chart of all of your chapters with a bar at the bottom for the entire lodge, which shows the percentage of units in each election status within each chapter and the lodge.</dd>
+<dt><code>[oauestats_unit_totals]</code></dt>
+<dd>Generates a table separated by chapter listing all of the units who have submitted election reports, listing how many youth were elected, how many adults they're eligible for, how many adults have been nominated so far, and how many adults they can still nominate, with a subtotal for each chapter.</dd>
+</dl>
