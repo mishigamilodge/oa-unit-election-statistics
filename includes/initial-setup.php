@@ -64,7 +64,7 @@ function oauestats_install()
     // only if it doesn't exist yet. If the columns or indexes need to
     // change it'll need update code (see below).
 
-    $sql = "CREATE TABLE `${dbprefix}inductions_data` (
+    $sql = "CREATE TABLE `{$dbprefix}inductions_data` (
   `id` INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `Status` VARCHAR(20) NOT NULL,
   `District` VARCHAR(30) NOT NULL,
@@ -100,7 +100,7 @@ function oauestats_install()
         return false;
     }
 
-    $sql = "CREATE TABLE `${dbprefix}nominations_data` (
+    $sql = "CREATE TABLE `{$dbprefix}nominations_data` (
   `id` INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `Nomination_Type` VARCHAR(30) NOT NULL,
   `Nominated_By` VARCHAR(150) NOT NULL,
@@ -143,8 +143,8 @@ function oauestats_install()
     if ($installed_version < 2) {
         # run code for updating from schema version 1 to version 2 here.
         # Make the unit number be an integer instead of a string, so it'll sort in the correct order.
-        $wpdb->query("ALTER TABLE `${dbprefix}inductions_data` CHANGE COLUMN `Unit_Number` `Unit_Number` INT(6) NOT NULL");
-        $wpdb->query("ALTER TABLE `${dbprefix}nominations_data` CHANGE COLUMN `Nominating_Unit_Number` `Nominating_Unit_Number` INT(6) NOT NULL");
+        $wpdb->query("ALTER TABLE `{$dbprefix}inductions_data` CHANGE COLUMN `Unit_Number` `Unit_Number` INT(6) NOT NULL");
+        $wpdb->query("ALTER TABLE `{$dbprefix}nominations_data` CHANGE COLUMN `Nominating_Unit_Number` `Nominating_Unit_Number` INT(6) NOT NULL");
     }
 
     # if ($installed_version < 3) {

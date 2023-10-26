@@ -147,7 +147,7 @@ function oauestats_upload_data() {
         );
         $inductColumnSizes = array();
         foreach ($inductColumnMap as $row => $val) {
-            $type = $wpdb->get_col($wpdb->prepare("SHOW COLUMNS FROM `${dbprefix}inductions_data` WHERE `Field` = %s", $val), 1);
+            $type = $wpdb->get_col($wpdb->prepare("SHOW COLUMNS FROM `{$dbprefix}inductions_data` WHERE `Field` = %s", $val), 1);
             $size = 0;
             if (substr($type[0], 0, 7) == "varchar") {
                 preg_match('/\((\d+)\)/', $type[0], $matches);
@@ -165,7 +165,7 @@ function oauestats_upload_data() {
         );
         $adultColumnSizes = array();
         foreach ($adultColumnMap as $row => $val) {
-            $type = $wpdb->get_col($wpdb->prepare("SHOW COLUMNS FROM `${dbprefix}nominations_data` WHERE `Field` = %s", $val), 1);
+            $type = $wpdb->get_col($wpdb->prepare("SHOW COLUMNS FROM `{$dbprefix}nominations_data` WHERE `Field` = %s", $val), 1);
             $size = 0;
             if (substr($type[0], 0, 7) == "varchar") {
                 preg_match('/\((\d+)\)/', $type[0], $matches);
@@ -210,9 +210,9 @@ function oauestats_upload_data() {
                     $wpdb->show_errors();
                     ob_start();
                     # Make an empty temporary table based on the inductions_data table
-                    $wpdb->query("CREATE TEMPORARY TABLE `${dbprefix}inductions_data_temp` SELECT * FROM `${dbprefix}inductions_data` LIMIT 0");
+                    $wpdb->query("CREATE TEMPORARY TABLE `{$dbprefix}inductions_data_temp` SELECT * FROM `{$dbprefix}inductions_data` LIMIT 0");
                     # cloning the table doesn't clone the auto-increment, so have to set that up manually
-                    $wpdb->query("ALTER TABLE `${dbprefix}inductions_data_temp` CHANGE COLUMN `id` `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT");
+                    $wpdb->query("ALTER TABLE `{$dbprefix}inductions_data_temp` CHANGE COLUMN `id` `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT");
                     # now we're ready for the incoming from the rest of the file.
                 }
             } else {
@@ -283,9 +283,9 @@ function oauestats_upload_data() {
                     $wpdb->show_errors();
                     ob_start();
                     # Make an empty temporary table based on the nominations_data table
-                    $wpdb->query("CREATE TEMPORARY TABLE `${dbprefix}nominations_data_temp` SELECT * FROM `${dbprefix}nominations_data` LIMIT 0");
+                    $wpdb->query("CREATE TEMPORARY TABLE `{$dbprefix}nominations_data_temp` SELECT * FROM `{$dbprefix}nominations_data` LIMIT 0");
                     # cloning the table doesn't clone the auto-increment, so have to set that up manually
-                    $wpdb->query("ALTER TABLE `${dbprefix}nominations_data_temp` CHANGE COLUMN `id` `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT");
+                    $wpdb->query("ALTER TABLE `{$dbprefix}nominations_data_temp` CHANGE COLUMN `id` `id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT");
                     # now we're ready for the incoming from the rest of the file.
                 }
             } else {
@@ -338,12 +338,12 @@ function oauestats_upload_data() {
         ob_start();
         if (!$error_output) {
             # delete the contents of the live table and copy the contents of the temp table to it
-            $wpdb->query("TRUNCATE TABLE `${dbprefix}inductions_data`");
-            $wpdb->query("INSERT INTO `${dbprefix}inductions_data` SELECT * FROM `${dbprefix}inductions_data_temp`");
-            $wpdb->query("DROP TABLE `${dbprefix}inductions_data_temp`");
-            $wpdb->query("TRUNCATE TABLE `${dbprefix}nominations_data`");
-            $wpdb->query("INSERT INTO `${dbprefix}nominations_data` SELECT * FROM `${dbprefix}nominations_data_temp`");
-            $wpdb->query("DROP TABLE `${dbprefix}nominations_data_temp`");
+            $wpdb->query("TRUNCATE TABLE `{$dbprefix}inductions_data`");
+            $wpdb->query("INSERT INTO `{$dbprefix}inductions_data` SELECT * FROM `{$dbprefix}inductions_data_temp`");
+            $wpdb->query("DROP TABLE `{$dbprefix}inductions_data_temp`");
+            $wpdb->query("TRUNCATE TABLE `{$dbprefix}nominations_data`");
+            $wpdb->query("INSERT INTO `{$dbprefix}nominations_data` SELECT * FROM `{$dbprefix}nominations_data_temp`");
+            $wpdb->query("DROP TABLE `{$dbprefix}nominations_data_temp`");
         }
         $error_output .= ob_get_clean();
         if (!$error_output) {

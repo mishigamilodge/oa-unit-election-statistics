@@ -29,17 +29,17 @@ function oauestats_completion_chart() {
 
     $chapters = [];
     ob_start();
-    $results = $wpdb->get_results("SELECT DISTINCT `Chapter` FROM `${dbprefix}inductions_data` WHERE `Chapter` <> 'ScoutReach'", OBJECT_K);
-    $totalunits = $wpdb->get_var("SELECT COUNT(*) FROM `${dbprefix}inductions_data` WHERE `Chapter` <> 'ScoutReach'");
+    $results = $wpdb->get_results("SELECT DISTINCT `Chapter` FROM `{$dbprefix}inductions_data` WHERE `Chapter` <> 'ScoutReach'", OBJECT_K);
+    $totalunits = $wpdb->get_var("SELECT COUNT(*) FROM `{$dbprefix}inductions_data` WHERE `Chapter` <> 'ScoutReach'");
     foreach ($results AS $obj) {
-       $obj->notsched = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM `${dbprefix}inductions_data`  WHERE `Status` = 'Not Scheduled' AND `Chapter` = %s", array($obj->Chapter)));
-       $obj->declined = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM `${dbprefix}inductions_data`  WHERE `Status` = 'Declined' AND `Chapter` = %s", array($obj->Chapter)));
-       $obj->requested = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM `${dbprefix}inductions_data`  WHERE `Status` = 'Requested' AND `Chapter` = %s", array($obj->Chapter)));
-       $obj->sched = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM `${dbprefix}inductions_data`  WHERE `Status` = 'Scheduled' AND `Chapter` = %s AND `Visit_Date` > NOW()", array($obj->Chapter)));
-       $obj->pastdue = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM `${dbprefix}inductions_data`  WHERE `Status` = 'Scheduled' AND `Chapter` = %s AND `Visit_Date` < NOW()", array($obj->Chapter)));
-       $obj->posted = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM `${dbprefix}inductions_data`  WHERE `Status` = 'Posted' AND `Chapter` = %s", array($obj->Chapter)));
-       $obj->approved = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM `${dbprefix}inductions_data`  WHERE `Status` = 'Approved' AND `Chapter` = %s", array($obj->Chapter)));
-       $obj->total = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM `${dbprefix}inductions_data` WHERE `Chapter` = %s", array($obj->Chapter)));
+       $obj->notsched = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM `{$dbprefix}inductions_data`  WHERE `Status` = 'Not Scheduled' AND `Chapter` = %s", array($obj->Chapter)));
+       $obj->declined = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM `{$dbprefix}inductions_data`  WHERE `Status` = 'Declined' AND `Chapter` = %s", array($obj->Chapter)));
+       $obj->requested = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM `{$dbprefix}inductions_data`  WHERE `Status` = 'Requested' AND `Chapter` = %s", array($obj->Chapter)));
+       $obj->sched = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM `{$dbprefix}inductions_data`  WHERE `Status` = 'Scheduled' AND `Chapter` = %s AND `Visit_Date` > NOW()", array($obj->Chapter)));
+       $obj->pastdue = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM `{$dbprefix}inductions_data`  WHERE `Status` = 'Scheduled' AND `Chapter` = %s AND `Visit_Date` < NOW()", array($obj->Chapter)));
+       $obj->posted = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM `{$dbprefix}inductions_data`  WHERE `Status` = 'Posted' AND `Chapter` = %s", array($obj->Chapter)));
+       $obj->approved = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM `{$dbprefix}inductions_data`  WHERE `Status` = 'Approved' AND `Chapter` = %s", array($obj->Chapter)));
+       $obj->total = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM `{$dbprefix}inductions_data` WHERE `Chapter` = %s", array($obj->Chapter)));
        $chapters[$obj->Chapter] = $obj;
     }
 

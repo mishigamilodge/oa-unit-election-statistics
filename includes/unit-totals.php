@@ -37,8 +37,8 @@ SELECT `District`,
 `Unit_City`,
 `Elected_Count`,
 COUNT(`Nomination_Status` <> 'Declined') AS `Nominated_Count`
-FROM `${dbprefix}inductions_data`
-LEFT JOIN `${dbprefix}nominations_data`
+FROM `{$dbprefix}inductions_data`
+LEFT JOIN `{$dbprefix}nominations_data`
        ON `Chapter` = `Nominating_Unit_Chapter`
 	  AND `Unit_Type` = `Nominating_Unit_Type`
       AND `Unit_Number` = `Nominating_Unit_Number`
