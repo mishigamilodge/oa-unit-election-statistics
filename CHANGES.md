@@ -1,3 +1,7 @@
+#### unreleased
+
+* PHP 8.2 compatibility fixes
+
 #### 1.1 / 2023-04-29
 
 * Add lodge-wide totals at bottom of Adult Nomination Eligibility
