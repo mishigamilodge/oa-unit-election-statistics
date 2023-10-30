@@ -33,7 +33,8 @@ function oauestats_status_chart() {
     $totalunits = $wpdb->get_var("SELECT COUNT(*) FROM `{$dbprefix}inductions_data` WHERE `Chapter` <> 'ScoutReach'");
     foreach ($results AS $obj) {
        $obj->notsched = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM `{$dbprefix}inductions_data`  WHERE `Status` = 'Not Scheduled' AND `Chapter` = %s", array($obj->Chapter)));
-       $obj->declined = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM `{$dbprefix}inductions_data`  WHERE `Status` = 'Declined' AND `Chapter` = %s", array($obj->Chapter)));
+       $obj->declined = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM `{$dbprefix}inductions_data`  WHERE `Status` = 'Declined' AND `Decline_Reason` != 'No Contact' AND `Chapter` = %s", array($obj->Chapter)));
+       $obj->nocontact = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM `{$dbprefix}inductions_data`  WHERE `Status` = 'Declined' AND `Decline_Reason` = 'No Contact' AND `Chapter` = %s", array($obj->Chapter)));
        $obj->requested = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM `{$dbprefix}inductions_data`  WHERE `Status` = 'Requested' AND `Chapter` = %s", array($obj->Chapter)));
        $obj->sched = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM `{$dbprefix}inductions_data`  WHERE `Status` = 'Scheduled' AND `Chapter` = %s AND `Visit_Date` > NOW()", array($obj->Chapter)));
        $obj->pastdue = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM `{$dbprefix}inductions_data`  WHERE `Status` = 'Scheduled' AND `Chapter` = %s AND `Visit_Date` < NOW()", array($obj->Chapter)));
@@ -54,6 +55,7 @@ function oauestats_status_chart() {
      everywhere we use them -->
 <div class="oauestats_notscheduled"></div>
 <div class="oauestats_declined"></div>
+<div class="oauestats_nocontact"></div>
 <div class="oauestats_requested"></div>
 <div class="oauestats_scheduled"></div>
 <div class="oauestats_pastdue"></div>
@@ -79,6 +81,24 @@ var oauestats_<?php echo esc_js($unique_token) ?>_chartconfig = {
     data: {
         labels: <?php echo wp_json_encode($labellist); ?>,
         datasets: [
+        {
+            label: 'No Contact',
+            data: [<?php
+            $count = 0;
+            $total = 0;
+            foreach ($chapterlist AS $chapter) {
+                $obj = $chapters[$chapter];
+                if ($count > 0) { echo ","; };
+                echo esc_js(($obj->nocontact / $obj->total) * 100);
+                $count++;
+                $total = $total + $obj->nocontact;
+            }
+            echo "," . esc_js(($total / $totalunits) * 100);
+            ?>],
+            backgroundColor: oauestats_<?php echo esc_js($unique_token) ?>_fixalpha($j(".oauestats_nocontact").css("background-color"), 0.2),
+            borderColor: oauestats_<?php echo esc_js($unique_token) ?>_fixalpha($j(".oauestats_nocontact").css("background-color"), 1),
+            borderWidth: 1
+        },
         {
             label: 'Declined',
             data: [<?php

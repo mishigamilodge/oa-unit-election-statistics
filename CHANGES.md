@@ -1,6 +1,7 @@
 #### unreleased
 
 * PHP 8.2 compatibility fixes
+* Count 'No Contact' Declines as "not completed"
 
 #### 1.1 / 2023-04-29
 

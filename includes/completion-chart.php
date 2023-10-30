@@ -33,7 +33,8 @@ function oauestats_completion_chart() {
     $totalunits = $wpdb->get_var("SELECT COUNT(*) FROM `{$dbprefix}inductions_data` WHERE `Chapter` <> 'ScoutReach'");
     foreach ($results AS $obj) {
        $obj->notsched = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM `{$dbprefix}inductions_data`  WHERE `Status` = 'Not Scheduled' AND `Chapter` = %s", array($obj->Chapter)));
-       $obj->declined = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM `{$dbprefix}inductions_data`  WHERE `Status` = 'Declined' AND `Chapter` = %s", array($obj->Chapter)));
+       $obj->declined = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM `{$dbprefix}inductions_data`  WHERE `Status` = 'Declined' AND `Decline_Reason` != 'No Contact' AND `Chapter` = %s", array($obj->Chapter)));
+       $obj->nocontact = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM `{$dbprefix}inductions_data`  WHERE `Status` = 'Declined' AND `Decline_Reason` = 'No Contact' AND `Chapter` = %s", array($obj->Chapter)));
        $obj->requested = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM `{$dbprefix}inductions_data`  WHERE `Status` = 'Requested' AND `Chapter` = %s", array($obj->Chapter)));
        $obj->sched = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM `{$dbprefix}inductions_data`  WHERE `Status` = 'Scheduled' AND `Chapter` = %s AND `Visit_Date` > NOW()", array($obj->Chapter)));
        $obj->pastdue = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM `{$dbprefix}inductions_data`  WHERE `Status` = 'Scheduled' AND `Chapter` = %s AND `Visit_Date` < NOW()", array($obj->Chapter)));
@@ -54,6 +55,7 @@ function oauestats_completion_chart() {
      everywhere we use them -->
 <div class="oauestats_notscheduled"></div>
 <div class="oauestats_declined"></div>
+<div class="oauestats_nocontact"></div>
 <div class="oauestats_requested"></div>
 <div class="oauestats_scheduled"></div>
 <div class="oauestats_pastdue"></div>
@@ -106,7 +108,7 @@ var oauestats_<?php echo esc_js($unique_token) ?>_chartconfig = {
             foreach ($chapterlist AS $chapter) {
                 $obj = $chapters[$chapter];
                 if ($count > 0) { echo ","; };
-                $num = $obj->pastdue + $obj->sched + $obj->requested + $obj->notsched;
+                $num = $obj->nocontact + $obj->pastdue + $obj->sched + $obj->requested + $obj->notsched;
                 echo esc_js(($num / $obj->total) * 100);
                 $count++;
                 $total = $total + $num;
