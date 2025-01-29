@@ -14,7 +14,7 @@ jobs:
       id: lasttag
     - uses: php-actions/composer@v6
       with:
-        php_version: 7.4
+        php_version: 8.2
         php_extensions: gd zip
     - name: Generate wordpress.org assets
       run: /bin/bash ${PWD}/.github/bin/make-readmetxt.sh

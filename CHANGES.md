@@ -1,6 +1,8 @@
 #### 1.3 / 2025-01-29
 
 * Adult Nomination data processing fixes for BSA -> Scouting branding change
+* Update code library dependencies
+* Now requires PHP 8.2 due to dependencies
 
 #### 1.2 / 2023-10-30
 
