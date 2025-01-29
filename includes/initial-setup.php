@@ -18,7 +18,7 @@
  */
 
 global $oauestats_db_version;
-$oauestats_db_version = 2;
+$oauestats_db_version = 3;
 
 function oauestats_create_table($ddl)
 {
@@ -111,7 +111,7 @@ function oauestats_install()
   `Nominating_Unit_City` VARCHAR(80),
   `Nominee_Full_Name` VARCHAR(80) NOT NULL,
   `Nomination_Status` VARCHAR(10) NOT NULL,
-  `BSA_Person_ID` INT(10),
+  `Scouting_Member_ID` INT(10),
   `Position` VARCHAR(150)
     );";
     if (!oauestats_create_table($sql)) {
@@ -147,7 +147,12 @@ function oauestats_install()
         $wpdb->query("ALTER TABLE `{$dbprefix}nominations_data` CHANGE COLUMN `Nominating_Unit_Number` `Nominating_Unit_Number` INT(6) NOT NULL");
     }
 
-    # if ($installed_version < 3) {
+    if ($installed_version < 3) {
+        # Change BSA -> Scouting
+        $wpdb->query("ALTER TABLE `{$dbprefix}nominations_data` CHANGE COLUMN `BSA_Person_ID` `Scouting_Member_ID` INT(10)");
+    }
+
+    # if ($installed_version < 4) {
     #     # run code for updating from schema version 2 to version 3 here.
     # }
 

@@ -160,7 +160,7 @@ function oauestats_upload_data() {
             'Nominated By' => 'Nominated_By',
             'Nominee Full Name' => 'Nominee_Full_Name',
             'Nomination Status' => 'Nomination_Status',
-            'BSA Person ID' => 'BSA_Person_ID',
+            'Scouting Member ID' => 'Scouting_Member_ID',
             'Position' => 'Position',
         );
         $adultColumnSizes = array();
@@ -356,7 +356,7 @@ function oauestats_upload_data() {
         } else {
             ?><div class="error"><p><strong>Import failed? Imported <?php esc_html_e($inductrecordcount) ?> visit records and <?php esc_html_e($adultrecordcount) ?> adult nominations.</strong></p>
             <p>Errors follow:</p>
-            <?php echo wp_kses($error_output) # this is already HTML ?>
+            <div><?php echo wp_kses($error_output, 'data') # this is already HTML ?></div>
             </div><?php
         }
     }
