@@ -1,6 +1,7 @@
-#### unreleased changes
+#### 1.4 / 2026-04-05
 
 * Remove Virtual Visits column from import and database, since OALM removed it and no longer exports it
+* Require PHP 8.3 for dependencies
 
 #### 1.3 / 2025-01-29
 

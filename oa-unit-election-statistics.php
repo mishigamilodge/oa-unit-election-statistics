@@ -3,10 +3,10 @@
  * Plugin Name: OA Unit Election Statistics
  * Plugin URI: https://github.com/mishigamilodge/oa-unit-election-statistics
  * Description: Upload data from your Inductions module and see pretty graphs
- * Version: 1.3
+ * Version: 1.4
  * Requires at least: 5.2
- * Tested up to: 6.7.1
- * Requires PHP: 8.2
+ * Tested up to: 6.9.4
+ * Requires PHP: 8.3
  * Author: Mishigami Lodge
  * Author URI: https://mishigami.org/
  * Author Email: codemonkeys@mishigami.org
