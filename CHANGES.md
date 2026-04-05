@@ -1,3 +1,7 @@
+#### unreleased changes
+
+* Remove Virtual Visits column from import and database, since OALM removed it and no longer exports it
+
 #### 1.3 / 2025-01-29
 
 * Adult Nomination data processing fixes for BSA -> Scouting branding change

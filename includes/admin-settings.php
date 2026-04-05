@@ -128,7 +128,6 @@ function oauestats_upload_data() {
             'Visit Type' => 'Visit_Type',
             'Visit Date' => 'Visit_Date',
             'Visit Time' => 'Visit_Time',
-            'Virtual Visit' => 'Virtual_Visit',
             'Unit Leader' => 'Unit_Leader',
             'Unit Leader Phone' => 'Unit_Leader_Phone',
             'Unit Leader Email' => 'Unit_Leader_Email',

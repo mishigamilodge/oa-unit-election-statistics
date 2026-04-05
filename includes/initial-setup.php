@@ -18,7 +18,7 @@
  */
 
 global $oauestats_db_version;
-$oauestats_db_version = 3;
+$oauestats_db_version = 4;
 
 function oauestats_create_table($ddl)
 {
@@ -79,7 +79,6 @@ function oauestats_install()
   `Visit_Type` VARCHAR(30),
   `Visit_Date` DATE,
   `Visit_Time` VARCHAR(10),
-  `Virtual_Visit` VARCHAR(10),
   `Unit_Leader` VARCHAR(80),
   `Unit_Leader_Phone` VARCHAR(30),
   `Unit_Leader_Email` VARCHAR(80),
@@ -152,8 +151,13 @@ function oauestats_install()
         $wpdb->query("ALTER TABLE `{$dbprefix}nominations_data` CHANGE COLUMN `BSA_Person_ID` `Scouting_Member_ID` INT(10)");
     }
 
-    # if ($installed_version < 4) {
-    #     # run code for updating from schema version 2 to version 3 here.
+    if ($installed_version < 4) {
+        # Remove Virtual Visit column because OALM removed it
+        $wpdb->query("ALTER TABLE `{$dbprefix}inductions_data` DROP COLUMN `Virtual_Visit`");
+    }
+
+    # if ($installed_version < 5) {
+    #     # run code for updating from schema version 4 to version 5 here.
     # }
 
     # insert next database revision update code immediately above this line.
